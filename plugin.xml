@@ -1,0 +1,259 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin xmlns:android="http://schemas.android.com/apk/res/android" id="neu-mdp-CDVYBPushPlugin" version="0.1"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0">
+    <name>CDVYBPushPlugin</name>
+    <preference name="ACCESS_KEY" />
+    <preference name="YUNBA_SECRETKEY" />
+    <preference name="XIAOMI_APPKEY" />
+    <preference name="HUAWEI_APPID" />
+    <preference name="XIAOMI_APPID" />
+
+    <js-module name="CDVYBPushPlugin" src="www/CDVYBPushPlugin.js">
+        <clobbers target="cordova.plugins.CDVYBPushPlugin" />
+    </js-module>
+    <platform name="ios">
+        <config-file parent="YBPushMeta" target="*-Info.plist">
+            <dict>
+                <key>AccessKey</key>
+                <string>$ACCESS_KEY</string>
+            </dict>
+        </config-file>
+        <header-file src="src/ios/YunBaService.h" />
+        <source-file framework="true" src="src/ios/libYunBa.a" />
+        <header-file src="src/ios/AppDelegate.h" />
+        <source-file src="src/ios/AppDelegate.m" />
+        <header-file src="src/ios/AppDelegate+YBPush.h" />
+        <source-file src="src/ios/AppDelegate+YBPush.m" />
+        <header-file src="src/ios/CDVYBPushPlugin.h" />
+        <source-file src="src/ios/CDVYBPushPlugin.m" />
+        <framework src="SystemConfiguration.framework" />
+        <config-file parent="/*" target="config.xml">
+            <feature name="CDVYBPushPlugin">
+                <param name="ios-package" value="CDVYBPushPlugin" />
+            </feature>
+        </config-file>
+    </platform>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="CDVYBPushPlugin">
+                <param name="android-package" value="CDVYBPushPlugin.CDVYBPushPlugin" />
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <permission
+            android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE"
+            android:protectionLevel="signature" />
+            <uses-permission android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+            <uses-permission android:name="android.permission.GET_TASKS" />
+            <uses-permission android:name="android.permission.VIBRATE"/>
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
+            <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+            <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <!--配置华为的appid-->
+            <meta-data
+            android:name="com.huawei.hms.client.appid"
+            android:value="$HUAWEI_APPID" />
+            
+            <meta-data
+            android:name="YUNBA_APPKEY"
+            android:value="$ACCESS_KEY"/>
+            <!-- YUNBA_SECRETKEY 值来自 Portal 上应用程序对应的 SecretKey-->
+            <meta-data
+            android:name="YUNBA_SECRETKEY"
+            android:value="$YUNBA_SECRETKEY"/>
+            
+            <meta-data
+            android:name="XIAOMI_APPKEY"
+            android:value="\ $XIAOMI_APPKEY" />
+            <meta-data
+            android:name="XIAOMI_APPID"
+            android:value="\ $XIAOMI_APPID" />
+            
+            <service
+            android:name="io.yunba.android.core.YunBaService"
+            android:exported="true" />
+            
+            <!-- since 1.8.0 option 可选项。用于同一设备中不同应用的 YunBa服务相互拉起的功能。 -->
+            <!-- 若不启用该功能可删除该组件，将不拉起其他应用也不能被其他应用拉起 -->
+            <service
+                android:name="io.yunba.android.core.YunBaDaemonService"
+                android:enabled="true"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="com.android.intent.daemon.pullup" />
+                    <category android:name="cn.neusoft.mdp.financial" />
+                </intent-filter>
+            </service>
+            
+            <receiver android:name="receiver.DemoReceiver">
+                <intent-filter>
+                    <action android:name="io.yunba.android.MESSAGE_RECEIVED_ACTION" />
+                    <action android:name="io.yunba.android.PRESENCE_RECEIVED_ACTION" />
+                    <action android:name="io.yunba.android.MESSAGE_CONNECTED_ACTION" />
+                    <action android:name="io.yunba.android.MESSAGE_DISCONNECTED_ACTION" />
+                    <!--监听华为推送是否连接成功-->
+                    <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTED_ACTION" />
+                    <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTION_FAILED_ACTION" />
+                    <category android:name="cn.neusoft.mdp.financial" />
+                </intent-filter>
+            </receiver>
+            
+            <receiver android:name="io.yunba.android.core.YunBaReceiver">
+                <intent-filter>
+                    <action android:name="android.intent.action.USER_PRESENT" />
+                    <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                </intent-filter>
+            </receiver>
+            
+            
+            <service
+            android:name="com.xiaomi.push.service.XMJobService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":pushservice" />
+            
+            <service
+            android:name="com.xiaomi.push.service.XMPushService"
+            android:enabled="true"
+            android:process=":pushservice" />
+            
+            <service
+            android:name="com.xiaomi.mipush.sdk.PushMessageHandler"
+            android:enabled="true"
+            android:exported="true" />
+            
+            <service
+            android:name="com.xiaomi.mipush.sdk.MessageHandleService"
+            android:enabled="true" />
+            
+            <receiver
+                android:name="io.yunba.android.thirdparty.receiver.ThirdPartyXMReceiver"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.ERROR" />
+                </intent-filter>
+            </receiver>
+            
+            <receiver
+                android:name="receiver.XMessageReceiver"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="com.xiaomi.mipush.ERROR" />
+                </intent-filter>
+            </receiver>
+            
+            <receiver
+                android:name="com.xiaomi.push.service.receivers.NetworkStatusReceiver"
+                android:exported="true">
+                <intent-filter>
+                    <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                    
+                    <category android:name="android.intent.category.DEFAULT" />
+                </intent-filter>
+            </receiver>
+            
+            <receiver
+                android:name="com.xiaomi.push.service.receivers.PingReceiver"
+                android:exported="false"
+                android:process=":pushservice">
+                <intent-filter>
+                    <action android:name="com.xiaomi.push.PING_TIMER" />
+                </intent-filter>
+            </receiver>
+            
+            <!-- 第三方相关 :接收Push消息（注册、Push消息、Push连接状态、标签，LBS上报结果）广播 -->
+            <receiver android:name="io.yunba.android.thirdparty.receiver.ThirdPartyHWReceiver">
+                <intent-filter>
+                    <!-- 必须,用于接收token-->
+                    <action android:name="com.huawei.android.push.intent.REGISTRATION" />
+                    <!-- 必须，用于接收消息-->
+                    <action android:name="com.huawei.android.push.intent.RECEIVE" />
+                    <!-- 可选，用于点击通知栏或通知栏上的按钮后触发onEvent回调-->
+                    <action android:name="com.huawei.android.push.intent.CLICK" />
+                    <!-- 可选，查看push通道是否连接，不查看则不需要-->
+                    <action android:name="com.huawei.intent.action.PUSH_STATE" />
+                    <!-- 可选，标签、地理位置上报回应，不上报则不需要 -->
+                    <action android:name="com.huawei.android.push.plugin.RESPONSE" />
+                </intent-filter>
+            </receiver>
+            
+            <receiver android:name="receiver.HWMessageReceiver">
+                <intent-filter>
+                    <!-- 必须,用于接收token-->
+                    <action android:name="com.huawei.android.push.intent.REGISTRATION" />
+                    <!-- 必须，用于接收消息-->
+                    <action android:name="com.huawei.android.push.intent.RECEIVE" />
+                    <!-- 可选，用于点击通知栏或通知栏上的按钮后触发onEvent回调-->
+                    <action android:name="com.huawei.android.push.intent.CLICK" />
+                    <!-- 可选，查看push通道是否连接，不查看则不需要-->
+                    <action android:name="com.huawei.intent.action.PUSH_STATE" />
+                    <!-- 可选，标签、地理位置上报回应，不上报则不需要 -->
+                    <action android:name="com.huawei.android.push.plugin.RESPONSE" />
+                </intent-filter>
+            </receiver>
+            <receiver android:name="com.huawei.hms.support.api.push.PushEventReceiver">
+                <intent-filter>
+                    <!-- 接收通道发来的通知栏消息，兼容老版本PUSH -->
+                    <action android:name="com.huawei.intent.action.PUSH" />
+                </intent-filter>
+            </receiver>
+            <receiver android:name="receiver.NotificationBroadcastReceiver">
+                <intent-filter>
+                    <action android:name="notification_clicked" />
+                </intent-filter>
+            </receiver>
+            <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+            <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="8487000" />
+        </config-file>
+        <source-file src="src/android/CDVYBPushPlugin.java"
+        target-dir="src/CDVYBPushPlugin" />
+        <source-file src="src/android/receiver/DemoReceiver.java"
+        target-dir="src/receiver" />
+        <source-file src="src/android/receiver/HWMessageReceiver.java"
+        target-dir="src/receiver" />
+        <source-file src="src/android/receiver/XMessageReceiver.java"
+        target-dir="src/receiver" />
+        <source-file src="src/android/receiver/NotificationBroadcastReceiver.java"
+        target-dir="src/receiver" />
+        <source-file src="src/android/util/DemoUtil.java"
+        target-dir="src/util" />
+        <source-file src="src/android/util/FakeR.java"
+        target-dir="src/util" />
+        <source-file src="src/android/util/YunBaIntent.java"
+        target-dir="src/util" />
+        <source-file src="src/android/libs/HMSSdkBase_2.5.2.300.jar" target-dir="libs"/>
+        <source-file src="src/android/libs/HMSSdkPush_2.5.2.300.jar" target-dir="libs"/>
+        <source-file src="src/android/libs/MiPush_SDK_Client_3_0_3.jar" target-dir="libs"/>
+        <source-file src="src/android/libs/timerLib-release.aar" target-dir="libs"/>
+        <source-file src="src/android/libs/yunba-sdk-release1.8.6.jar" target-dir="libs"/>
+        <source-file src="src/android/util/OSUtils.java"
+        target-dir="src/util" />
+        <source-file src="src/android/util/BuildProperties.java"
+        target-dir="src/util" />
+    </platform>
+</plugin>
+
