@@ -4,8 +4,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -15,6 +17,7 @@ import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,6 +27,10 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
@@ -70,7 +77,8 @@ public class DemoUtil {
     for (RunningAppProcessInfo appProcess : appProcesses) {
       /* importance:
 			 The relative importance level that the system places on this process.
-			 May be one of IMPORTANCE_FOREGROUND,IMPORTANCE_BACKGROUND,
+			 May be one of IMPORTANCE_FOREGROUND,
+			 ,
 			 IMPORTANCE_VISIBLE,IMPORTANCE_SERVICE, or IMPORTANCE_EMPTY.
 			 These constants are numbered so that "more important" values
 			 are always smaller than "less important" values.
@@ -116,21 +124,36 @@ public class DemoUtil {
 
 
   public static boolean showNotification(Context context, String topic, String msg) {
-    int type = 0;
+    Log.i("NotificationMonitor", "通知栏显示的信息: "+msg);
+    String msgContent="";
+    String msgStatus="";
+    //String jsonStr ="{'content':'11','status':'root'}";
+    JSONObject jsonObj = null;
+    try {
+      jsonObj = new JSONObject(msg);
+      msgContent = jsonObj.getString("content");
+      msgStatus = jsonObj.getString("action");
+      Log.i("获取的消息内容-->",msgContent);
+      Log.i("获取的消息标识-->",msgStatus);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
+    int type = new Random().nextInt();
     fakeR = new FakeR(context);
     try {
       Intent intentClick = new Intent(context, NotificationBroadcastReceiver.class);
       intentClick.setAction("notification_clicked");
       intentClick.putExtra(NotificationBroadcastReceiver.TYPE, type);
-      intentClick.putExtra("message",msg);
-      PendingIntent pendingIntentClick = PendingIntent.getBroadcast(context, 0, intentClick, PendingIntent.FLAG_ONE_SHOT);
+      intentClick.putExtra("message",msgStatus);
+      PendingIntent pendingIntentClick = PendingIntent.getBroadcast(context, type , intentClick, PendingIntent.FLAG_ONE_SHOT);
       Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
       NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
         .setSmallIcon(fakeR.getId("mipmap", "icon"))
         .setContentTitle(topic)
-        .setContentText(msg)
-        .setSound(defaultSoundUri)
-        .setContentIntent(pendingIntentClick);
+        .setContentText(msgContent)
+        .setContentIntent(pendingIntentClick)
+        .setDefaults(Notification.DEFAULT_ALL);
       NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
       notificationManager.notify(type, notificationBuilder.build());
     }catch (Exception e){
@@ -257,5 +280,9 @@ public class DemoUtil {
     builder.delete(builder.length() - cement.length(), builder.length());
     return builder.toString();
   }
+
+
+
+
 
 }

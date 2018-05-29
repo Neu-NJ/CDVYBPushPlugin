@@ -17,12 +17,13 @@ public class DemoReceiver extends BroadcastReceiver {
     private final static String TAG="YUNBA";
 	@Override
 	public void onReceive(Context context, Intent intent) {
-
+    //Log.i("接收到的广播", "onReceive: "+intent.getAction());
 
 		if (YunBaManager.MESSAGE_RECEIVED_ACTION.equals(intent.getAction())) {
 			String status = "Yunba - Connected";
 			String topicORalias = intent.getStringExtra(YunBaManager.MQTT_TOPIC);
 			String message = intent.getStringExtra(YunBaManager.MQTT_MSG);
+      Log.d(TAG,message);
 			boolean flag = DemoUtil.showNotification(context, topicORalias, message);
 			//上报显示通知栏状态， 以方便后台统计
 			if (flag)

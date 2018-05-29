@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin xmlns:android="http://schemas.android.com/apk/res/android" id="CDVYBPushPlugin" version="0.1"
+<plugin xmlns:android="http://schemas.android.com/apk/res/android" id="CDVYBPushPlugin" version="1.2"
     xmlns="http://apache.org/cordova/ns/plugins/1.0">
     <name>CDVYBPushPlugin</name>
     <preference name="ACCESS_KEY" />
@@ -7,6 +7,7 @@
     <preference name="XIAOMI_APPKEY" />
     <preference name="HUAWEI_APPID" />
     <preference name="XIAOMI_APPID" />
+	<preference name="THIRD_TITLE" />
 
     <js-module name="CDVYBPushPlugin" src="www/CDVYBPushPlugin.js">
         <clobbers target="cordova.plugins.CDVYBPushPlugin" />
@@ -41,9 +42,9 @@
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <permission
-            android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE"
+            android:name=".permission.MIPUSH_RECEIVE"
             android:protectionLevel="signature" />
-            <uses-permission android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE" />
+            <uses-permission android:name=".permission.MIPUSH_RECEIVE" />
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -77,6 +78,10 @@
             <meta-data
             android:name="XIAOMI_APPID"
             android:value="\ $XIAOMI_APPID" />
+			
+			<meta-data
+			  android:name="THIRD_TITLE"
+			  android:value="$THIRD_TITLE" />
             
             <service
             android:name="io.yunba.android.core.YunBaService"
@@ -90,9 +95,19 @@
                 android:exported="true">
                 <intent-filter>
                     <action android:name="com.android.intent.daemon.pullup" />
-                    <category android:name="cn.neusoft.mdp.financial" />
+                    <category android:name="cn.neusoft.mdp.test" />
                 </intent-filter>
             </service>
+			
+			<service
+			  android:name="service.NotificationMonitor"
+			  android:enabled="true"
+			  android:exported="true"
+			  android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+			  <intent-filter>
+				<action android:name="android.service.notification.NotificationListenerService" />
+			  </intent-filter>
+			</service>
             
             <receiver android:name="receiver.DemoReceiver">
                 <intent-filter>
@@ -103,7 +118,8 @@
                     <!--监听华为推送是否连接成功-->
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTED_ACTION" />
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTION_FAILED_ACTION" />
-                    <category android:name="cn.neusoft.mdp.financial" />
+					<action android:name="io.yunba.notificationmonitor.NOTIFICATION_EVENT" />
+                    <category android:name="cn.neusoft.mdp.test" />
                 </intent-filter>
             </receiver>
             
@@ -239,6 +255,10 @@
         target-dir="src/receiver" />
         <source-file src="src/android/receiver/NotificationBroadcastReceiver.java"
         target-dir="src/receiver" />
+		
+		<source-file src="src/android/service/NotificationMonitor.java"
+        target-dir="src/service" />
+		
         <source-file src="src/android/util/DemoUtil.java"
         target-dir="src/util" />
         <source-file src="src/android/util/FakeR.java"

@@ -1,9 +1,17 @@
 package CDVYBPushPlugin;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,9 +28,11 @@ import org.json.JSONObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 
 import io.yunba.android.manager.YunBaManager;
 import receiver.NotificationBroadcastReceiver;
+import service.NotificationMonitor;
 import util.DemoUtil;
 import util.OSUtils;
 import util.YunBaIntent;
@@ -33,11 +43,20 @@ import util.YunBaIntent;
 public class CDVYBPushPlugin extends CordovaPlugin {
     private YunBaIntent yunBaIntent;
     public static PropertyChangeSupport changes;
+    private boolean isEnabledNLS = false;
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
       YunBaManager.setThirdPartyEnable(this.cordova.getActivity(), true);
       YunBaManager.setXMRegister(getMetaData(this.cordova.getActivity(),"XIAOMI_APPID"),getMetaData(this.cordova.getActivity(),"XIAOMI_APPKEY"));
-      YunBaManager.start(cordova.getActivity());
+
+      isEnabledNLS = isEnabled();
+      if (!isEnabledNLS) {
+        showConfirmDialog();
+      }else{
+        toggleNotificationListenerService();
+      }
+
+      YunBaManager.start(this.cordova.getActivity());
       if (action.equals("coolMethod")) {
             String message = args.getString(0);
             this.coolMethod(message, callbackContext);
@@ -131,11 +150,11 @@ public class CDVYBPushPlugin extends CordovaPlugin {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           // TODO Auto-generated method stub
-          Log.d("YUNBA","change");
-          Log.d("YUNBA",evt.getPropertyName());
-          Log.d("YUNBA",evt.getOldValue()+"");
-          Log.d("YUNBA",evt.getNewValue()+"");
-            Log.d("YUNBA",callbackContext.getCallbackId());
+          Log.d("点击跳转","change");
+          Log.d("点击跳转",evt.getPropertyName());
+          Log.d("点击跳转",evt.getOldValue()+"");
+          Log.d("点击跳转",evt.getNewValue()+"");
+            Log.d("点击跳转",callbackContext.getCallbackId());
           PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, evt.getNewValue()+"");
           pluginResult.setKeepCallback(true);
           callbackContext.sendPluginResult(pluginResult);
@@ -182,5 +201,74 @@ public class CDVYBPushPlugin extends CordovaPlugin {
     }else {
       callbackContext.error("请输入要取消订阅的频道");
     }
+  }
+
+  private boolean isEnabled() {
+    String pkgName = this.cordova.getActivity().getPackageName();
+    final String flat = Settings.Secure.getString(this.cordova.getActivity().getContentResolver(),
+      "enabled_notification_listeners");
+    if (!TextUtils.isEmpty(flat)) {
+      final String[] names = flat.split(":");
+      for (int i = 0; i < names.length; i++) {
+        final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+        if (cn != null) {
+          if (TextUtils.equals(pkgName, cn.getPackageName())) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private void showConfirmDialog() {
+    new AlertDialog.Builder(cordova.getContext())
+      .setMessage("请打开通知栏权限")
+      .setTitle("通知栏权限")
+      .setIconAttribute(android.R.attr.alertDialogIcon)
+      .setCancelable(true)
+      .setPositiveButton("确认",
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int id) {
+            cordova.getContext().startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+
+          }
+        })
+      .setNegativeButton("取消",
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int id) {
+            // do nothing
+          }
+        })
+      .create().show();
+  }
+
+  /**
+   * 判断服务是否开启
+   *
+   * @return
+   */
+  public static boolean isServiceRunning(Context context, String ServiceName) {
+    if (("").equals(ServiceName) || ServiceName == null)
+      return false;
+    ActivityManager myManager = (ActivityManager) context
+      .getSystemService(Context.ACTIVITY_SERVICE);
+    ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
+      .getRunningServices(99999);
+    for (int i = 0; i < runningService.size(); i++) {
+      if (runningService.get(i).service.getClassName().toString()
+        .equals(ServiceName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void toggleNotificationListenerService() {
+    PackageManager pm = this.cordova.getContext().getPackageManager();
+    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getContext(), service.NotificationMonitor.class),
+      PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getContext(), service.NotificationMonitor.class),
+      PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
   }
 }

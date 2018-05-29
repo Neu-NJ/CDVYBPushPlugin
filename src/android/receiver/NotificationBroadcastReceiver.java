@@ -1,13 +1,21 @@
 package receiver;
 
+import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.util.Log;
+
+import java.util.ArrayList;
+
 import CDVYBPushPlugin.CDVYBPushPlugin;
-import cn.neusoft.mdp.financial.MainActivity;
-import cn.neusoft.mdp.financial.MainActivity;
+
+import cn.neusoft.mdp.test.MainActivity;
+import service.NotificationMonitor;
 import util.YunBaIntent;
 
 /**
@@ -21,6 +29,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
+    Log.i("NotificationMonitor", "点击时通知栏监听服务: "+isServiceRunning(context,"service.NotificationMonitor"));
     String action = intent.getAction();
     int type = intent.getIntExtra(TYPE, -1);
     message=intent.getStringExtra("message");
@@ -28,21 +37,44 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
       NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
       notificationManager.cancel(type);
     }
+
     if (action.equals("notification_clicked")) {
       //处理点击事件
-      Log.d("YUNBA","点击了通知");
       if (message==null){
       }else {
         yunBaIntent.setMessage(message);
-        Log.d("YUNBA",yunBaIntent.getMessage());
         CDVYBPushPlugin.changes.firePropertyChange("message", "FIRST_ACCOUNT", yunBaIntent.getMessage());
       }
       Intent intent1=new Intent(context, MainActivity.class);
-      intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);// 关键的一步，设置启动模式，两种情况
+
       context.startActivity(intent1);
     }
     if (action.equals("notification_cancelled")) {
       //处理滑动清除和点击删除事件
     }
+  }
+
+
+  /**
+   * 判断服务是否开启
+   *
+   * @return
+   */
+  public static boolean isServiceRunning(Context context, String ServiceName) {
+    if (("").equals(ServiceName) || ServiceName == null)
+      return false;
+    ActivityManager myManager = (ActivityManager) context
+      .getSystemService(Context.ACTIVITY_SERVICE);
+    ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
+      .getRunningServices(99999);
+    for (int i = 0; i < runningService.size(); i++) {
+      if (runningService.get(i).service.getClassName().toString()
+        .equals(ServiceName)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
