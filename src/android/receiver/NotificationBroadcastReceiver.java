@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import CDVYBPushPlugin.CDVYBPushPlugin;
 
-import cn.neusoft.mdp.test.MainActivity;
+import cn.neusoft.mdp.financial.MainActivity;
 import service.NotificationMonitor;
 import util.YunBaIntent;
 

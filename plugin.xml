@@ -42,9 +42,9 @@
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <permission
-            android:name=".permission.MIPUSH_RECEIVE"
+            android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE"
             android:protectionLevel="signature" />
-            <uses-permission android:name=".permission.MIPUSH_RECEIVE" />
+            <uses-permission android:name="cn.neusoft.mdp.financial.permission.MIPUSH_RECEIVE" />
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -95,7 +95,7 @@
                 android:exported="true">
                 <intent-filter>
                     <action android:name="com.android.intent.daemon.pullup" />
-                    <category android:name="android.intent.category.LAUNCHER" />
+                    <category android:name="cn.neusoft.mdp.test" />
                 </intent-filter>
             </service>
 			
@@ -119,7 +119,7 @@
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTED_ACTION" />
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTION_FAILED_ACTION" />
 					<action android:name="io.yunba.notificationmonitor.NOTIFICATION_EVENT" />
-                    <category android:name="android.intent.category.LAUNCHER" />
+                    <category android:name="cn.neusoft.mdp.test" />
                 </intent-filter>
             </receiver>
             
@@ -270,6 +270,7 @@
         <source-file src="src/android/libs/MiPush_SDK_Client_3_0_3.jar" target-dir="libs"/>
         <source-file src="src/android/libs/timerLib-release.aar" target-dir="libs"/>
         <source-file src="src/android/libs/yunba-sdk-release1.8.6.jar" target-dir="libs"/>
+		<source-file src="src/android/libs/android-support-v4.jar" target-dir="libs"/>
         <source-file src="src/android/util/OSUtils.java"
         target-dir="src/util" />
         <source-file src="src/android/util/BuildProperties.java"
