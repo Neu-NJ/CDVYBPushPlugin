@@ -95,7 +95,7 @@
                 android:exported="true">
                 <intent-filter>
                     <action android:name="com.android.intent.daemon.pullup" />
-                    <category android:name="cn.neusoft.mdp.test" />
+                    <category android:name="android.intent.category.LAUNCHER" />
                 </intent-filter>
             </service>
 			
@@ -119,7 +119,7 @@
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTED_ACTION" />
                     <action android:name="io.yunba.android.MESSAGE_HMS_CONNECTION_FAILED_ACTION" />
 					<action android:name="io.yunba.notificationmonitor.NOTIFICATION_EVENT" />
-                    <category android:name="cn.neusoft.mdp.test" />
+                    <category android:name="android.intent.category.LAUNCHER" />
                 </intent-filter>
             </receiver>
             
