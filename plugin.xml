@@ -270,7 +270,6 @@
         <source-file src="src/android/libs/MiPush_SDK_Client_3_0_3.jar" target-dir="libs"/>
         <source-file src="src/android/libs/timerLib-release.aar" target-dir="libs"/>
         <source-file src="src/android/libs/yunba-sdk-release1.8.6.jar" target-dir="libs"/>
-		<source-file src="src/android/libs/android-support-v4.jar" target-dir="libs"/>
         <source-file src="src/android/util/OSUtils.java"
         target-dir="src/util" />
         <source-file src="src/android/util/BuildProperties.java"

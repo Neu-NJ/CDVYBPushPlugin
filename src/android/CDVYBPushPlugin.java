@@ -222,7 +222,7 @@ public class CDVYBPushPlugin extends CordovaPlugin {
   }
 
   private void showConfirmDialog() {
-    new AlertDialog.Builder(cordova.getContext())
+    new AlertDialog.Builder(cordova.getActivity())
       .setMessage("请打开通知栏权限")
       .setTitle("通知栏权限")
       .setIconAttribute(android.R.attr.alertDialogIcon)
@@ -230,7 +230,7 @@ public class CDVYBPushPlugin extends CordovaPlugin {
       .setPositiveButton("确认",
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int id) {
-            cordova.getContext().startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+            cordova.getActivity().startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
 
           }
         })
@@ -265,10 +265,10 @@ public class CDVYBPushPlugin extends CordovaPlugin {
   }
 
   private void toggleNotificationListenerService() {
-    PackageManager pm = this.cordova.getContext().getPackageManager();
-    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getContext(), service.NotificationMonitor.class),
+    PackageManager pm = this.cordova.getActivity().getPackageManager();
+    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getActivity(), service.NotificationMonitor.class),
       PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getContext(), service.NotificationMonitor.class),
+    pm.setComponentEnabledSetting(new ComponentName(this.cordova.getActivity(), service.NotificationMonitor.class),
       PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
   }
 }
