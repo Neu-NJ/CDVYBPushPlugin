@@ -40,15 +40,15 @@
 // for device token
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
-    NSLog(@"get Device Token: %@", [NSString stringWithFormat:@"Device Token: %@", deviceToken]);
+//    NSLog(@"get Device Token: %@", [NSString stringWithFormat:@"Device Token: %@", deviceToken]);
     // uncomment to store device token to YunBa
-    [YunBaService storeDeviceToken:deviceToken resultBlock:^(BOOL succ, NSError *error) {
-        if (succ) {
-            NSLog(@"store device token to YunBa succ");
-        } else {
-            NSLog(@"store device token to YunBa failed due to : %@, recovery suggestion: %@", error, [error localizedRecoverySuggestion]);
-        }
-    }];
+//    [YunBaService storeDeviceToken:deviceToken resultBlock:^(BOOL succ, NSError *error) {
+//        if (succ) {
+//            NSLog(@"store device token to YunBa succ");
+//        } else {
+//            NSLog(@"store device token to YunBa failed due to : %@, recovery suggestion: %@", error, [error localizedRecoverySuggestion]);
+//        }
+//    }];
 }
 
 /**
